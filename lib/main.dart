@@ -1,5 +1,7 @@
-
 import 'package:flutter/material.dart';
+import 'package:untitled/pages/pagina02.dart';
+
+final globalNavigatorKey = GlobalKey<NavigatorState>();
 
 void main() => runApp(const MiApp());
 
@@ -8,9 +10,10 @@ class MiApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       title: "Mi App",
       home: Inicio(),
+      navigatorKey: globalNavigatorKey, // GlobalKey()
     );
   }
 }
@@ -23,7 +26,6 @@ class Inicio extends StatefulWidget {
 }
 
 class _InicioState extends State<Inicio> {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(body: cuerpo());
@@ -39,14 +41,17 @@ Widget cuerpo() {
               fit: BoxFit.cover)),
       child: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          mainAxisSize: MainAxisSize.max,
           children: [
-            nombre(),
-            const SizedBox(height: 15),
-            campoUsuario(),
-            campoContrasena(),
-            botonEntrar()
+            Text('Home'),
+            ElevatedButton(
+              onPressed: () => {
+                Navigator.push(globalNavigatorKey.currentContext!,
+                    MaterialPageRoute(builder: (context) => Pagina02()))
+              },
+              child: Text('Ir a la otra pagina'),
+            )
           ],
         ),
       ));
@@ -65,29 +70,29 @@ Widget campoUsuario() {
       padding: const EdgeInsets.symmetric(horizontal: 75, vertical: 3),
       child: const TextField(
         decoration: InputDecoration(
-            hintText: "Username",
-            fillColor: Colors.white, filled: true),
+            hintText: "Username", fillColor: Colors.white, filled: true),
       ));
 }
 
-Widget campoContrasena(){
+Widget campoContrasena() {
   return Container(
-      padding:  EdgeInsets.symmetric(horizontal: 75, vertical: 3),
+      padding: EdgeInsets.symmetric(horizontal: 75, vertical: 3),
       child: const TextField(
         obscureText: true,
         decoration: InputDecoration(
-            hintText: "Password",
-            fillColor: Colors.white, filled: true),
+            hintText: "Password", fillColor: Colors.white, filled: true),
       ));
 }
 
-Widget botonEntrar(){
+Widget botonEntrar() {
   return TextButton(
-    onPressed: (){},
-    child: Text("Enter", style: TextStyle(fontSize: 17),),
-    style: TextButton.styleFrom(
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
-        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 50))
-  );
+      onPressed: () {},
+      child: Text(
+        "Enter",
+        style: TextStyle(fontSize: 17),
+      ),
+      style: TextButton.styleFrom(
+          backgroundColor: Colors.blue,
+          foregroundColor: Colors.white,
+          padding: EdgeInsets.symmetric(vertical: 10, horizontal: 50)));
 }
