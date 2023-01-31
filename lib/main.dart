@@ -1,98 +1,80 @@
 import 'package:flutter/material.dart';
-import 'package:untitled/pages/pagina02.dart';
 
-final globalNavigatorKey = GlobalKey<NavigatorState>();
+void main() => runApp(MyApp());
 
-void main() => runApp(const MiApp());
+class MyApp extends StatefulWidget {
+  const MyApp({super.key});
 
-class MiApp extends StatelessWidget {
-  const MiApp({Key? key}) : super(key: key);
+  @override
+  State<StatefulWidget> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  List<Persona> _personas = [
+    Persona("Jose", "Ramos", "+52 449-279-6244"),
+    Persona("Carlos", "Lozano", "+52 392-109-11"),
+    Persona("Emiliano", "Gonzalez", "+52 445-109-11"),
+    Persona("Victoria", "Herrera", "+52 953-439-11")
+  ];
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: "Mi App",
-      home: Inicio(),
-      navigatorKey: globalNavigatorKey, // GlobalKey()
+      title: 'Material App',
+      home: Scaffold(
+          appBar: AppBar(
+            title: Text("Material App bar"),
+          ),
+          body: ListView.builder(
+              itemCount: _personas.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text(
+                      _personas[index].name + ' ' + _personas[index].lastname),
+                  subtitle: Text(_personas[index].phone),
+                  leading: CircleAvatar(
+                    child: Text(_personas[index].name.substring(0, 1)),
+                  ),
+                  trailing: Icon(Icons.arrow_forward_ios),
+                  onLongPress: () {
+                    _borrarPersona(context, _personas[index]);
+                  },
+                );
+              })),
     );
   }
-}
 
-class Inicio extends StatefulWidget {
-  const Inicio({Key? key}) : super(key: key);
+  _borrarPersona(context, persona) {
+    showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+              title: Text("¿Eliminar contacto?"),
+              content: Text(
+                  "¿Está seguro de querer eliminar a " + persona.name + "?"),
+              actions: [
+                TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text("Cancelar")),
+                TextButton(
+                    onPressed: () {
+                      _personas.remove(persona);
+                      setState(() {
 
-  @override
-  State<Inicio> createState() => _InicioState();
-}
-
-class _InicioState extends State<Inicio> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(body: cuerpo());
+                      });
+                      Navigator.pop(context);
+                    },
+                    child: Text("Eliminar", style: TextStyle(color: Colors.red),))
+              ],
+            ));
   }
 }
 
-Widget cuerpo() {
-  return Container(
-      decoration: const BoxDecoration(
-          image: DecorationImage(
-              image: NetworkImage(
-                  "https://i.pinimg.com/originals/1c/02/20/1c022001c80c4d0d2a13da2137ca56ff.jpg"),
-              fit: BoxFit.cover)),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            Text('Home'),
-            ElevatedButton(
-              onPressed: () => {
-                Navigator.push(globalNavigatorKey.currentContext!,
-                    MaterialPageRoute(builder: (context) => Pagina02()))
-              },
-              child: Text('Ir a la otra pagina'),
-            )
-          ],
-        ),
-      ));
-}
+class Persona {
+  late String name;
+  late String lastname;
+  late String phone;
 
-Widget nombre() {
-  return const Text(
-    "Sign In",
-    style: TextStyle(
-        color: Colors.white, fontSize: 25.0, fontWeight: FontWeight.bold),
-  );
-}
-
-Widget campoUsuario() {
-  return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 75, vertical: 3),
-      child: const TextField(
-        decoration: InputDecoration(
-            hintText: "Username", fillColor: Colors.white, filled: true),
-      ));
-}
-
-Widget campoContrasena() {
-  return Container(
-      padding: EdgeInsets.symmetric(horizontal: 75, vertical: 3),
-      child: const TextField(
-        obscureText: true,
-        decoration: InputDecoration(
-            hintText: "Password", fillColor: Colors.white, filled: true),
-      ));
-}
-
-Widget botonEntrar() {
-  return TextButton(
-      onPressed: () {},
-      child: Text(
-        "Enter",
-        style: TextStyle(fontSize: 17),
-      ),
-      style: TextButton.styleFrom(
-          backgroundColor: Colors.blue,
-          foregroundColor: Colors.white,
-          padding: EdgeInsets.symmetric(vertical: 10, horizontal: 50)));
+  Persona(this.name, this.lastname, this.phone);
 }
