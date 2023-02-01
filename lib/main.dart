@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:untitled/models/Gif.dart';
+import 'package:http/http.dart' as http;
 
 void main() => runApp(MyApp());
 
@@ -10,71 +14,72 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  List<Persona> _personas = [
-    Persona("Jose", "Ramos", "+52 449-279-6244"),
-    Persona("Carlos", "Lozano", "+52 392-109-11"),
-    Persona("Emiliano", "Gonzalez", "+52 445-109-11"),
-    Persona("Victoria", "Herrera", "+52 953-439-11")
-  ];
+  late Future<List<Gif>> _listadoGifs;
+
+  Future<List<Gif>> _getGif() async {
+    final response = await http.get(Uri.parse(
+        "https://api.giphy.com/v1/gifs/trending?api_key=TKE3NhlqsXA371U3OsRNpe4mf4yLXvQB&limit=10&rating=g"));
+    List<Gif> gifs = [];
+    if (response.statusCode == 200) {
+      String body = utf8.decode(response.bodyBytes);
+      final jsonData = jsonDecode(body);
+      for (var item in jsonData["data"]) {
+        gifs.add(Gif(item["title"], item["images"]["downsized"]["url"]));
+      }
+      return gifs;
+    } else {
+      throw Exception("Failed request");
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _listadoGifs = _getGif();
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Material App',
-      home: Scaffold(
-          appBar: AppBar(
-            title: Text("Material App bar"),
-          ),
-          body: ListView.builder(
-              itemCount: _personas.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(
-                      _personas[index].name + ' ' + _personas[index].lastname),
-                  subtitle: Text(_personas[index].phone),
-                  leading: CircleAvatar(
-                    child: Text(_personas[index].name.substring(0, 1)),
-                  ),
-                  trailing: Icon(Icons.arrow_forward_ios),
-                  onLongPress: () {
-                    _borrarPersona(context, _personas[index]);
-                  },
+        title: 'Material App',
+        home: Scaffold(
+            appBar: AppBar(
+              title: Text("Material App bar"),
+            ),
+            body: FutureBuilder(
+              future: _listadoGifs,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  print(snapshot.data);
+                  return GridView.count(
+                    crossAxisCount: 2,
+                    children: _listGifs(snapshot.data),
+                  );
+                } else if (snapshot.hasError) {
+                  print(snapshot.error);
+                  return Text("error");
+                }
+                return Center(
+                  child: CircularProgressIndicator(),
                 );
-              })),
-    );
+              },
+            )));
   }
 
-  _borrarPersona(context, persona) {
-    showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-              title: Text("¿Eliminar contacto?"),
-              content: Text(
-                  "¿Está seguro de querer eliminar a " + persona.name + "?"),
-              actions: [
-                TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: Text("Cancelar")),
-                TextButton(
-                    onPressed: () {
-                      _personas.remove(persona);
-                      setState(() {
+  List<Widget> _listGifs(List<Gif>? data) {
+    List<Widget> gifs = [];
+    if (data == null) return gifs;
 
-                      });
-                      Navigator.pop(context);
-                    },
-                    child: Text("Eliminar", style: TextStyle(color: Colors.red),))
-              ],
-            ));
+    for (var gif in data) {
+      gifs.add(Card(
+          child: Column(children: [
+           Expanded(child: Image.network(gif.url, fit: BoxFit.fill,))
+           // Padding(
+            //  padding: const EdgeInsets.all(8.0),
+             // child: Text(gif.name),
+            //)
+          ])));
+    }
+    return gifs;
   }
-}
-
-class Persona {
-  late String name;
-  late String lastname;
-  late String phone;
-
-  Persona(this.name, this.lastname, this.phone);
 }
